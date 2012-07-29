@@ -128,3 +128,11 @@ body {
         padding: 1px 1px;
         font-size: 62.5%
 }
+
+/*
+ * My tracks screen
+ */
+#myTracksTable > thead > tr > th {
+        text-align: left;
+}
+

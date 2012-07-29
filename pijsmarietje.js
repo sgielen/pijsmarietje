@@ -460,13 +460,16 @@ PijsMarietje.prototype.setup_ui = function() {
         $('#tabs').tabs({
                 select: function(event, ui) {
                         that.mainTabShown = ui.index == 0;
-                        if(ui.index == 1 && !that.logged_in) {
+                        if(!that.mainTabShown && !that.logged_in) {
                                 var tabs = $(this);
                                 that.after_login_cb = function() {
-                                        tabs.tabs('select', 1);
+                                        tabs.tabs('select', ui.index);
                                 };
                                 that.prepare_login();
                                 return false;
+                        }
+                        if(ui.index == 2) {
+                                that.retrieve_my_tracks();
                         }
                         return true;
                 }
@@ -664,6 +667,46 @@ PijsMarietje.prototype.on_scroll = function() {
                         this.qm_request_more_results();
         }
 };
+
+PijsMarietje.prototype.retrieve_my_tracks = function() {
+        var that = this;
+        // Clear the table first
+        $("#myTracksTable tbody").find("tr").remove();
+        // Add a bogus entry
+        var add_entry = function(key, artist, title) {
+                var extended = $('<tr><td></td><td class="mt-info" colspan="2">Hi</td></tr>');
+                extended.hide();
+
+                var a = $('<td class="artist"></td>');
+                a.text(artist);
+                var t = $('<td class="title"></td>');
+                t.text(title);
+                var c = $('<td class="mt-handle mt-closed">&gt;</td>');
+                c.click(function() {
+                        if(c.hasClass('mt-open')) {
+                                c.text(">");
+                                extended.hide('fast');
+                                c.removeClass('mt-open');
+                                c.addClass('mt-close');
+                        } else {
+                                c.text("\\/");
+                                extended.show('fast');
+                                c.removeClass('mt-close');
+                                c.addClass('mt-open');
+                        }
+                });
+                var row = $('<tr></tr>');
+                row.append(c);
+                row.append(a);
+                row.append(t);
+
+                $("#myTracksTable tbody").append(row);
+                $("#myTracksTable tbody").append(extended);
+        }
+        add_entry("a", "Netsky", "Wanna Die For You");
+        add_entry("b", "Blaat", "Last Man");
+        add_entry("c", "Netsky", "Come Alive");
+}
 
 $(document).ready(function(){
         pijsmarietje = new PijsMarietje();
