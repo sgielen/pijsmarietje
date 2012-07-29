@@ -106,7 +106,9 @@ function PijsMarietje() {
                 'accessKey': this.msg_accessKey,
                 'requests': this.msg_requests,
                 'query_media_results': this.msg_query_media_results,
-                'playing': this.msg_playing};
+                'playing': this.msg_playing,
+                'media_by_part': this.msg_media_by_part,
+                'media_by': function() {}};
 }
 
 PijsMarietje.prototype.run = function() {
@@ -249,6 +251,39 @@ PijsMarietje.prototype.msg_query_media_results = function(msg) {
         setTimeout(function() {
                 that.on_scroll();
         },0);
+};
+
+PijsMarietje.prototype.msg_media_by_part = function(msg) {
+        msg.part.map(function(item) {
+                var extended = $('<tr><td></td><td class="mt-info" colspan="2">Hi</td></tr>');
+                extended.hide();
+
+                var a = $('<td class="artist"></td>');
+                a.text(item.artist);
+                var t = $('<td class="title"></td>');
+                t.text(item.title);
+                var c = $('<td class="mt-handle mt-closed">&gt;</td>');
+                c.click(function() {
+                        if(c.hasClass('mt-open')) {
+                                c.text(">");
+                                extended.hide('fast');
+                                c.removeClass('mt-open');
+                                c.addClass('mt-close');
+                        } else {
+                                c.text("\\/");
+                                extended.show('fast');
+                                c.removeClass('mt-close');
+                                c.addClass('mt-open');
+                        }
+                });
+                var row = $('<tr></tr>');
+                row.append(c);
+                row.append(a);
+                row.append(t);
+
+                $("#myTracksTable tbody").append(row);
+                $("#myTracksTable tbody").append(extended);
+        });
 };
 
 PijsMarietje.prototype.refresh_resultsTable = function() {
@@ -672,40 +707,8 @@ PijsMarietje.prototype.retrieve_my_tracks = function() {
         var that = this;
         // Clear the table first
         $("#myTracksTable tbody").find("tr").remove();
-        // Add a bogus entry
-        var add_entry = function(key, artist, title) {
-                var extended = $('<tr><td></td><td class="mt-info" colspan="2">Hi</td></tr>');
-                extended.hide();
-
-                var a = $('<td class="artist"></td>');
-                a.text(artist);
-                var t = $('<td class="title"></td>');
-                t.text(title);
-                var c = $('<td class="mt-handle mt-closed">&gt;</td>');
-                c.click(function() {
-                        if(c.hasClass('mt-open')) {
-                                c.text(">");
-                                extended.hide('fast');
-                                c.removeClass('mt-open');
-                                c.addClass('mt-close');
-                        } else {
-                                c.text("\\/");
-                                extended.show('fast');
-                                c.removeClass('mt-close');
-                                c.addClass('mt-open');
-                        }
-                });
-                var row = $('<tr></tr>');
-                row.append(c);
-                row.append(a);
-                row.append(t);
-
-                $("#myTracksTable tbody").append(row);
-                $("#myTracksTable tbody").append(extended);
-        }
-        add_entry("a", "Netsky", "Wanna Die For You");
-        add_entry("b", "Blaat", "Last Man");
-        add_entry("c", "Netsky", "Come Alive");
+        this.channel.send_message({type: 'list_my_media'})
+        // Continue in msg_media_by_part
 }
 
 $(document).ready(function(){
