@@ -255,32 +255,67 @@ PijsMarietje.prototype.msg_query_media_results = function(msg) {
 
 PijsMarietje.prototype.msg_media_by_part = function(msg) {
         msg.part.map(function(item) {
-                var extended = $('<tr><td></td><td class="mt-info" colspan="2">Hi</td></tr>');
-                extended.hide();
-
+                // Create the normal row for this entry
                 var a = $('<td class="artist"></td>');
                 a.text(item.artist);
                 var t = $('<td class="title"></td>');
                 t.text(item.title);
                 var c = $('<td class="mt-handle mt-closed">&gt;</td>');
-                c.click(function() {
-                        if(c.hasClass('mt-open')) {
-                                c.text(">");
-                                extended.hide('fast');
-                                c.removeClass('mt-open');
-                                c.addClass('mt-close');
-                        } else {
-                                c.text("\\/");
-                                extended.show('fast');
-                                c.removeClass('mt-close');
-                                c.addClass('mt-open');
-                        }
-                });
                 var row = $('<tr></tr>');
                 row.append(c);
                 row.append(a);
                 row.append(t);
 
+                // Create the Extended row for this entry
+                var extended = $('<tr><td></td><td class="mt-info" colspan="2"></td></tr>');
+                var mtinfo = extended.find('.mt-info');
+                var updateButton = $('<button type="button">Update</button>');
+                updateButton.click(function() {
+                        // TODO: send this update to the Marietje daemon
+                        item.artist = a.find('.mt-artist-changer').val();
+                        item.title  = t.find('.mt-title-changer').val();
+                        c.click();
+                });
+                var deleteButton = $('<button type="button">Delete</button>');
+                deleteButton.click(function() {
+                        var confirmed = confirm("Are you sure you want to delete:\n" + item.artist + " - " + item.title);
+                        if(confirmed) {
+                                // TODO: send this delete to the Marietje daemon
+                                row.remove();
+                                extended.remove();
+                        }
+                });
+                mtinfo.append(updateButton);
+                mtinfo.append(deleteButton);
+                extended.hide();
+
+                // Display or hide the extended row, and change the normal row, on click
+                c.click(function() {
+                        if(c.hasClass('mt-open')) {
+                                c.text(">");
+                                extended.hide('fast');
+                                a.text(item.artist);
+                                t.text(item.title);
+                                c.removeClass('mt-open');
+                                c.addClass('mt-close');
+                        } else {
+                                c.text("\\/");
+                                a.empty();
+                                var aChanger = $('<input type="text" name="artist" class="mt-artist-changer">');
+                                aChanger.val(item.artist);
+                                a.append(aChanger);
+                                t.empty();
+                                var tChanger = $('<input type="text" name="title" class="mt-title-changer">');
+                                tChanger.val(item.title);
+                                t.append(tChanger);
+
+                                extended.show('fast');
+                                c.removeClass('mt-close');
+                                c.addClass('mt-open');
+                        }
+                });
+
+                // Insert the two rows
                 $("#myTracksTable tbody").append(row);
                 $("#myTracksTable tbody").append(extended);
         });
