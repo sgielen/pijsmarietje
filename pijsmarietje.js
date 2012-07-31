@@ -254,6 +254,7 @@ PijsMarietje.prototype.msg_query_media_results = function(msg) {
 };
 
 PijsMarietje.prototype.msg_media_by_part = function(msg) {
+        var that = this;
         msg.part.map(function(item) {
                 // Create the normal row for this entry
                 var a = $('<td class="artist"></td>');
@@ -280,7 +281,9 @@ PijsMarietje.prototype.msg_media_by_part = function(msg) {
                 deleteButton.click(function() {
                         var confirmed = confirm("Are you sure you want to delete:\n" + item.artist + " - " + item.title);
                         if(confirmed) {
-                                // TODO: send this delete to the Marietje daemon
+                                that.channel.send_message({
+                                        type: 'delete_media',
+                                        mediaKey: item.key });
                                 row.remove();
                                 extended.remove();
                         }
