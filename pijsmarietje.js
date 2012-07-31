@@ -272,9 +272,15 @@ PijsMarietje.prototype.msg_media_by_part = function(msg) {
                 var mtinfo = extended.find('.mt-info');
                 var updateButton = $('<button type="button">Update</button>');
                 updateButton.click(function() {
-                        // TODO: send this update to the Marietje daemon
                         item.artist = a.find('.mt-artist-changer').val();
                         item.title  = t.find('.mt-title-changer').val();
+                        that.channel.send_message({
+                                type: 'update_media',
+                                mediaKey: item.key,
+                                media: {
+                                        artist: item.artist,
+                                        title: item.title,
+                                }});
                         c.click();
                 });
                 var deleteButton = $('<button type="button">Delete</button>');
